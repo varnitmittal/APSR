@@ -25,7 +25,7 @@ execution_path = os.getcwd()
 
 app = Flask(__name__)
 CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+#app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 def loadModel():
@@ -84,7 +84,7 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
 parked_car_boxes = None
 
 def algorithm(image_1_path, image_2_path):
-
+    count = 0
     image1 = skimage.io.imread(image_1_path)
     image2 = skimage.io.imread(image_2_path)
 
@@ -123,18 +123,25 @@ def algorithm(image_1_path, image_2_path):
             occupancy_status = (0,0,255)
         
         else:
+            count += 1
             occupancy_status = (0,255,0)
         cv2.rectangle(image2,(x1,y1), (x2,y2) , occupancy_status ,1)
         cv2.circle(image2,(centers[i][0],centers[i][1]),2,occupancy_status,2)
-            
+
+    print(count)        
     cv2.imwrite("final_image.png", image2)
     return True
 
 
 def encodeFinal(finalImagePath):
-    with open(finalImagePath, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-        return encoded_string
+    #with open(finalImagePath, "rb") as image_file:
+    #    encoded_string = base64.b64encode(image_file.read())
+    #    return encoded_string
+    with open(finalImagePath, "rb") as f:
+        x = f.read()
+        x = base64.b64encode(x).decode('utf-8')
+        return x
+
 
 
 @app.route("/", methods=['GET'])
@@ -148,18 +155,16 @@ def index():
 @app.route("/predict", methods=["POST"])
 @cross_origin()
 def predict():
-    """ content = request.get_json()
+    content = request.get_json()
     image_in = content['chosenImage']
     image_in = base64.b64decode(image_in)
     image_in = Image.open(io.BytesIO(image_in))
     if image_in.mode != "RGB":
         image_in = image_in.convert("RGB")
-    image_in.save(r'received_image.png') """
+    image_in.save(r'received_image.png')
 
-    #image_1_path = os.path.join(IMAGE_DIR,"item1.jpg")    
-    #image_2_path = os.path.join(IMAGE_DIR,"/API/received_image.png")
     image_1_path = 'item1.jpg'
-    image_2_path = 'received_image.jpg'
+    image_2_path = 'received_image.png'
 
     flag = algorithm(image_1_path, image_2_path)
 
@@ -172,10 +177,13 @@ def predict():
         final_image_path = 'final_image.png'
         response = jsonify({
             "success": True,
-            "finalImage": str(encodeFinal(final_image_path))
+            "imstr": str(encodeFinal(final_image_path))
         })
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "*")
+        #response.headers.add("Access-Control-Allow-Origin", "*")
+        #response.headers.add("Access-Control-Allow-Headers", "*")
+        #response.headers.add("Access-Control-Allow-Origin", 'Content-Type')
+        #response.headers.add("Access-Control-Allow-Headers", "*")
+        #'Content-Type'
         return response
 
 
@@ -183,4 +191,4 @@ def predict():
 if __name__ == "__main__":
     model = loadModel()
     port = int(os.environ.get('PORT', 8000))
-    app.run(port=port)
+    app.run(debug=True, port=port)
