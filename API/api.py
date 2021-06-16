@@ -6,6 +6,7 @@ import os
 from flask_cors import CORS, cross_origin
 
 import tensorflow as tf
+graph = tf.get_default_graph()
 import numpy as np
 import cv2
 
@@ -28,14 +29,14 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 def loadModel():
-    ROOT_DIR = "./API/"
+    ROOT_DIR = "."
     MODEL_DIR = os.path.join(ROOT_DIR,"logs")
     COCO_MODEL_PATH = os.path.join(ROOT_DIR,"mask_rcnn_coco.h5")
 
     if not os.path.exists(COCO_MODEL_PATH):
         utils.download_trained_weights(COCO_MODEL_PATH)
             
-    IMAGE_DIR = os.path.join(ROOT_DIR,"images")
+    #IMAGE_DIR = os.path.join(ROOT_DIR,"images")
 
     model = MaskRCNN(mode='inference', config=MaskRCNNConfig(),model_dir=MODEL_DIR)
 
@@ -80,7 +81,6 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
                'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
                'teddy bear', 'hair drier', 'toothbrush']
 
-# Location of parking spaces
 parked_car_boxes = None
 
 def algorithm(image_1_path, image_2_path):
@@ -88,8 +88,9 @@ def algorithm(image_1_path, image_2_path):
     image1 = skimage.io.imread(image_1_path)
     image2 = skimage.io.imread(image_2_path)
 
-    result1 = model.detect([image1])    
-    result2 = model.detect([image2])    
+    with graph.as_default():
+        result1 = model.detect([image1])    
+        result2 = model.detect([image2])
 
     r1 = result1[0]
     r2 = result2[0]
@@ -126,8 +127,8 @@ def algorithm(image_1_path, image_2_path):
         cv2.rectangle(image2,(x1,y1), (x2,y2) , occupancy_status ,1)
         cv2.circle(image2,(centers[i][0],centers[i][1]),2,occupancy_status,2)
             
-    cv2.imwrite("./API/image_result/final_image.png", image2)
-    return true
+    cv2.imwrite("final_image.png", image2)
+    return True
 
 
 def encodeFinal(finalImagePath):
@@ -157,8 +158,8 @@ def predict():
 
     #image_1_path = os.path.join(IMAGE_DIR,"item1.jpg")    
     #image_2_path = os.path.join(IMAGE_DIR,"/API/received_image.png")
-    image_1_path = './API/item1.jpg'
-    image_2_path = './API/received_image.png'
+    image_1_path = 'item1.jpg'
+    image_2_path = 'received_image.jpg'
 
     flag = algorithm(image_1_path, image_2_path)
 
@@ -168,10 +169,10 @@ def predict():
         })
         return response
     else: 
-        final_image_path = './API/image_result/final_image.png'
+        final_image_path = 'final_image.png'
         response = jsonify({
             "success": True,
-            #"finalImage": str(encodeFinal(final_image_path))
+            "finalImage": str(encodeFinal(final_image_path))
         })
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "*")
