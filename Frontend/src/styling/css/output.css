@@ -1,0 +1,16 @@
+.mycss-list{
+    color: #f3f3f3;
+    font-size: 2.2rem;
+}
+
+.mycss-o-img{
+    max-height: 90vh;
+    max-width: 90vw;
+}
+
+@media screen and (max-width: 640px){
+    .mycss-list{
+        color: #f3f3f3;
+        font-size: 1.2rem;
+    }   
+}

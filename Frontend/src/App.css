@@ -1,0 +1,56 @@
+body{
+  background-color: #2d3436 !important;
+  min-width: 270px;
+}
+
+.main{
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+}
+
+.mycss-nbar{
+  display: flex;
+  background-color: #000;
+  color: #fff;
+  justify-content: center;
+  align-items: center;
+  font: outline;
+  font-weight: bold;
+  font-size: 2.5rem;
+  height: 7.5vh;
+  position: sticky;
+  top:0;
+  overflow: hidden !important;
+}
+
+#mycss-area{
+  display: flex;
+  padding: 1.2rem;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-size: 4rem;
+  background-color: #2d3436;
+  min-height: 90vh;
+  min-width: 77vw;
+}
+
+
+@media screen and (max-width: 640px){
+  .main{
+    display: flex !important;
+    flex-direction: column-reverse !important;
+  }
+  .mycss-nbar{
+    font-size: 2rem;
+    height: 8vh;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .mycss-nbar{
+    font-size: 1.5rem;
+    height: 7vh;
+  }
+}
